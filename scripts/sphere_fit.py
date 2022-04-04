@@ -23,6 +23,21 @@ def point_callback(array):
 	points_received = True
 
 
+def low_pass_filter(sphere):
+	filter_in = [sphere.xc, sphere.yc, sphere.zc, sphere.radius]
+	filter_out = [0, 0, .25, .025]
+	filter_gain = .25
+	
+	for i, attr in enumerate(('xc', 'yc', 'zc', 'radius')):
+		# filter param
+		filter_in[i] = sphere_data.xc
+		filter_out[i] = filter_gain * filter_in[i] + (1 - filter_gain) * filter_out[i]
+		# set current attribute to value obtained
+		setattr(sphere, attr, filter_out[i])
+	
+	return sphere
+
+
 def set_sphere_params(data):
 	global sphere_params
 	# Get A and B arrays
@@ -54,6 +69,8 @@ if __name__ == "__main__":
 		if points_received:
 			# Calculate params needed
 			set_sphere_params(points)
+			# apply low-pass filter
+			sphere_params = low_pass_filter(sphere_params)
 			# Publish the results
 			point_pub.publish(sphere_params)
 		rate.sleep()
