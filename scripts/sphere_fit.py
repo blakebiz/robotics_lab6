@@ -24,16 +24,37 @@ def point_callback(array):
 
 
 def low_pass_filter(sphere):
-	filter_in = [sphere.xc, sphere.yc, sphere.zc, sphere.radius]
+	filter_in = [0, 0, 0, 0]
 	filter_out = [0, 0, .25, .025]
 	filter_gain = .25
 	
-	for i, attr in enumerate(('xc', 'yc', 'zc', 'radius')):
+	#for i, attr in enumerate(('xc', 'yc', 'zc', 'radius')):
 		# filter param
-		filter_in[i] = getattr(sphere, attr)
-		filter_out[i] = filter_gain * filter_in[i] + (1 - filter_gain) * filter_out[i]
+		#filter_in[i] = getattr(sphere, attr)
+		#filter_out[i] = filter_gain * filter_in[i] + (1 - filter_gain) * filter_out[i]
 		# set current attribute to value obtained
-		setattr(sphere, attr, filter_out[i])
+		#setattr(sphere, attr, filter_out[i])
+	
+	#return sphere
+	
+	# original attempt above
+	# tried to do it manually below but still same result :/
+	
+	filter_in[0] = sphere.xc
+	filter_out[0] = filter_gain * filter_in[0] + (1 - filter_gain) * filter_out[0]
+	sphere.xc = filter_out[0]
+	
+	filter_in[1] = sphere.yc
+	filter_out[1] = filter_gain * filter_in[1] + (1 - filter_gain) * filter_out[1]
+	sphere.yc = filter_out[1]
+
+	filter_in[2] = sphere.zc
+	filter_out[2] = filter_gain * filter_in[2] + (1 - filter_gain) * filter_out[2]
+	sphere.zc = filter_out[2]
+	
+	filter_in[3] = sphere.radius
+	filter_out[3] = filter_gain * filter_in[3] + (1 - filter_gain) * filter_out[3]
+	sphere.radius = filter_out[3]
 	
 	return sphere
 
