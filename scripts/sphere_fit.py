@@ -30,7 +30,7 @@ def low_pass_filter(sphere):
 	
 	for i, attr in enumerate(('xc', 'yc', 'zc', 'radius')):
 		# filter param
-		filter_in[i] = sphere_data.xc
+		filter_in[i] = getattr(sphere, attr)
 		filter_out[i] = filter_gain * filter_in[i] + (1 - filter_gain) * filter_out[i]
 		# set current attribute to value obtained
 		setattr(sphere, attr, filter_out[i])
