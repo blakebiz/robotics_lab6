@@ -61,8 +61,8 @@ if __name__ == "__main__":
 	
 	# set defaults for filtering
 	filter_in = [0, 0, 0, 0]
-	filter_out = [0, 0, .25, .025]
-	filter_gain = .25
+	filter_out = [0, 0, .2, .02]
+	filter_gain = .05
 	filters = [filter_in, filter_out, filter_gain]
 	
 	# main loop for publishing
