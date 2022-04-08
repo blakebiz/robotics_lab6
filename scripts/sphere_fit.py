@@ -23,40 +23,15 @@ def point_callback(array):
 	points_received = True
 
 
-def low_pass_filter(sphere):
-	filter_in = [0, 0, 0, 0]
-	filter_out = [0, 0, .25, .025]
-	filter_gain = .25
-	
-	#for i, attr in enumerate(('xc', 'yc', 'zc', 'radius')):
+def low_pass_filter(sphere, filter_in, filter_out, filter_gain):
+	for i, attr in enumerate(('xc', 'yc', 'zc', 'radius')):
 		# filter param
-		#filter_in[i] = getattr(sphere, attr)
-		#filter_out[i] = filter_gain * filter_in[i] + (1 - filter_gain) * filter_out[i]
+		filter_in[i] = getattr(sphere, attr)
+		filter_out[i] = filter_gain * filter_in[i] + (1 - filter_gain) * filter_out[i]
 		# set current attribute to value obtained
-		#setattr(sphere, attr, filter_out[i])
+		setattr(sphere, attr, filter_out[i])
 	
-	#return sphere
-	
-	# original attempt above
-	# tried to do it manually below but still same result :/
-	
-	filter_in[0] = sphere.xc
-	filter_out[0] = filter_gain * filter_in[0] + (1 - filter_gain) * filter_out[0]
-	sphere.xc = filter_out[0]
-	
-	filter_in[1] = sphere.yc
-	filter_out[1] = filter_gain * filter_in[1] + (1 - filter_gain) * filter_out[1]
-	sphere.yc = filter_out[1]
-
-	filter_in[2] = sphere.zc
-	filter_out[2] = filter_gain * filter_in[2] + (1 - filter_gain) * filter_out[2]
-	sphere.zc = filter_out[2]
-	
-	filter_in[3] = sphere.radius
-	filter_out[3] = filter_gain * filter_in[3] + (1 - filter_gain) * filter_out[3]
-	sphere.radius = filter_out[3]
-	
-	return sphere
+	return sphere, [filter_in, filter_out, filter_gain]
 
 
 def set_sphere_params(data):
@@ -84,6 +59,12 @@ if __name__ == "__main__":
 	# set the frequency to 10 ms
 	rate = rospy.Rate(10)
 	
+	# set defaults for filtering
+	filter_in = [0, 0, 0, 0]
+	filter_out = [0, 0, .25, .025]
+	filter_gain = .25
+	filters = [filter_in, filter_out, filter_gain]
+	
 	# main loop for publishing
 	while not rospy.is_shutdown():
 		# make sure we've received data to work on
@@ -91,7 +72,7 @@ if __name__ == "__main__":
 			# Calculate params needed
 			set_sphere_params(points)
 			# apply low-pass filter
-			sphere_params = low_pass_filter(sphere_params)
+			sphere_params, filters = low_pass_filter(sphere_params, *filters)
 			# Publish the results
 			point_pub.publish(sphere_params)
 		rate.sleep()
