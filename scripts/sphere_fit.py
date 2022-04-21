@@ -7,11 +7,31 @@ import math
 
 from robot_vision_lectures.msg import XYZarray, SphereParams
 from cv_bridge import CvBridge
+from std_msgs.msg import Bool
 
 
 points_received = False
 points = np.array([])
 sphere_params = SphereParams()
+
+# set defaults for filtering
+filter_in = [0, 0, 0, 0]
+filter_out = [0, 0, .2, .02]
+filter_gain = .05
+filters = [filter_in, filter_out, filter_gain]
+pause_toggle = False
+
+
+# topic /pause_toggle
+def pause_callback(data):
+	global pause_toggle
+	pause_toggle = data
+	if data:
+		filter_in = [0, 0, 0, 0]
+		filter_out = [0, 0, .2, .02]
+		filter_gain = .05
+		filters = [filter_in, filter_out, filter_gain]
+
 
 # topic /xyz_cropped_ball
 def point_callback(array):
@@ -53,22 +73,19 @@ if __name__ == "__main__":
 	# initialize ros node
 	rospy.init_node('robotics_lab5', anonymous=True)
 	# declare pub and sub
-	point_sub = rospy.Subscriber('xyz_cropped_ball', XYZarray, point_callback)
+	point_sub = rospy.Subscriber('/xyz_cropped_ball', XYZarray, point_callback)
+	pause_sub = rospy.Subscriber('/pause_toggle', Bool, pause_callback)
 	point_pub = rospy.Publisher('/sphere_params', SphereParams, queue_size=1)
 	
 	# set the frequency to 10 ms
 	rate = rospy.Rate(10)
 	
-	# set defaults for filtering
-	filter_in = [0, 0, 0, 0]
-	filter_out = [0, 0, .2, .02]
-	filter_gain = .05
-	filters = [filter_in, filter_out, filter_gain]
+	
 	
 	# main loop for publishing
 	while not rospy.is_shutdown():
 		# make sure we've received data to work on
-		if points_received:
+		if points_received and not pause_toggle:
 			# Calculate params needed
 			set_sphere_params(points)
 			# apply low-pass filter
